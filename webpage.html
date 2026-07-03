@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tool Marketplace</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f7f7f5;
+    --bg-tertiary: #f0efea;
+    --text: #1a1a18;
+    --text-secondary: #6b6b67;
+    --text-muted: #9b9b96;
+    --border: rgba(0,0,0,0.12);
+    --border-md: rgba(0,0,0,0.22);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --blue-bg: #E6F1FB;
+    --blue-text: #185FA5;
+    --green-bg: #E1F5EE;
+    --green-text: #0F6E56;
+    --amber-bg: #FAEEDA;
+    --amber-text: #633806;
+    --purple-bg: #EEEDFE;
+    --purple-text: #3C3489;
+    --red-bg: #FCEBEB;
+    --red-text: #A32D2D;
+    --teal-text: #1D9E75;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1e1e1c;
+      --bg-secondary: #252523;
+      --bg-tertiary: #2c2c2a;
+      --text: #f0efea;
+      --text-secondary: #a0a09c;
+      --text-muted: #6b6b67;
+      --border: rgba(255,255,255,0.1);
+      --border-md: rgba(255,255,255,0.2);
+      --blue-bg: #042C53;
+      --blue-text: #85B7EB;
+      --green-bg: #04342C;
+      --green-text: #5DCAA5;
+      --amber-bg: #412402;
+      --amber-text: #FAC775;
+      --purple-bg: #26215C;
+      --purple-text: #AFA9EC;
+      --red-bg: #501313;
+      --red-text: #F09595;
+      --teal-text: #5DCAA5;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-tertiary);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 220px;
+    background: var(--bg);
+    border-right: 0.5px solid var(--border);
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem 1.25rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sidebar-logo i { font-size: 20px; color: #378ADD; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.1s;
+  }
+  .nav-item:hover { background: var(--bg-secondary); color: var(--text); }
+  .nav-item.active { background: var(--bg-secondary); color: var(--text); font-weight: 500; }
+  .nav-item i { font-size: 17px; }
+  .nav-section { font-size: 11px; color: var(--text-muted); padding: 1rem 0.75rem 0.25rem; letter-spacing: 0.05em; text-transform: uppercase; }
+
+  /* Main */
+  .main { flex: 1; padding: 2rem 2.5rem; overflow-x: hidden; }
+
+  /* Page header */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .page-title { font-size: 22px; font-weight: 600; margin-bottom: 3px; }
+  .page-sub { font-size: 13px; color: var(--text-secondary); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 0.5px solid var(--border-md);
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.1s, transform 0.1s;
+    text-decoration: none;
+  }
+  .btn:hover { background: var(--bg-secondary); }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary {
+    background: #185FA5;
+    color: #fff;
+    border-color: #185FA5;
+  }
+  .btn-primary:hover { background: #0C447C; }
+
+  /* Stat cards */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+  }
+  .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+  .stat-val { font-size: 24px; font-weight: 600; }
+  .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+  /* ===================== Tabs ===================== */
+
+.tabs{
+    display:flex;
+    align-items:center;
+    gap:36px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:32px;
+    padding:0;
+}
+
+.tab{
+    padding:14px 0;
+    font-size:15px;
+    font-weight:500;
+    color:var(--text-secondary);
+    cursor:pointer;
+    border:none;
+    border-bottom:2px solid transparent;
+    background:transparent;
+    transition:all .2s ease;
+    margin-bottom:-1px;
+}
+
+.tab:hover{
+    color:var(--text);
+}
+
+.tab.active{
+    color:#378ADD;
+    border-bottom:2px solid #378ADD;
+}
+  /* Tools grid */
+  .section-header{
+    margin-bottom:20px;
+}
+  .section-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 2rem;
+  }
+  .tool-card{
+    background:var(--bg);
+    border:0.5px solid var(--border);
+    border-radius:12px;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    min-height:220px;
+}
+.tool-actions{
+    display:flex;
+    gap:10px;
+    margin-top:auto;
+}
+
+.tool-actions .btn{
+    flex:1;
+}
+  .tool-card:hover { border-color: var(--border-md); }
+  .tool-card.featured { border: 2px solid #378ADD; }
+
+  .tool-icon {
+    width: 38px; height: 38px;
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  .tool-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:12px;
+}
+  .tool-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .tool-desc{
+    font-size:12px;
+    color:var(--text-secondary);
+    line-height:1.55;
+    margin-bottom:18px;
+}
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-md);
+    letter-spacing: 0.03em;
+  }
+  .badge-active { background: var(--green-bg); color: var(--green-text); }
+  .badge-trial { background: var(--amber-bg); color: var(--amber-text); }
+  .badge-inactive { background: var(--bg-secondary); color: var(--text-secondary); border: 0.5px solid var(--border); }
+
+
+  .avatar:first-child { margin-left: 0; }
+
+  .add-tool-card {
+    background: transparent;
+    border: 0.5px dashed var(--border-md);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+    min-height: 190px;
+    transition: background 0.1s;
+    color: var(--text-secondary);
+    font-size: 13px;
+  }
+  .add-tool-card:hover { background: var(--bg); }
+  .add-tool-card i { font-size: 24px; }
+
+  /* Filter bar */
+  .filter-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .filter-bar select, .filter-bar input {
+    padding: 7px 12px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border-md);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+  .filter-bar select:focus, .filter-bar input:focus { border-color: #378ADD; }
+  .filter-bar input { min-width: 200px; }
+
+  /* Table */
+  .table-wrap {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-top: 1rem;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--bg-secondary); }
+  th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 0.5px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  th:hover { color: var(--text); }
+  th .sort-icon { margin-left: 4px; opacity: 0.4; }
+  th.sorted .sort-icon { opacity: 1; }
+  td { padding: 11px 16px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg-secondary); }
+
+  .client-row { display: flex; align-items: center; gap: 10px; }
+  .client-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .client-name { font-weight: 500; font-size: 13px; }
+  .client-email { font-size: 11px; color: var(--text-secondary); }
+
+  .tool-pill {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    border: 0.5px solid var(--border);
+    margin: 2px;
+    white-space: nowrap;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 1.75rem;
+    width: 540px;
+    max-width: 95vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: translateY(10px);
+    transition: transform 0.15s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; }
+  .modal-title { font-size: 17px; font-weight: 600; }
+  .modal-close { background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: 20px; padding: 2px; }
+  .modal-close:hover { color: var(--text); }
+  .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: var(--text-secondary); }
+  .detail-val { font-weight: 500; text-align: right; }
+  .modal-section { margin-top: 1.25rem; }
+  .modal-section-title { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; font-weight: 600; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--text);
+    color: var(--bg);
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+  }
+  .empty-state i { font-size: 32px; margin-bottom: 0.75rem; display: block; opacity: 0.4; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .tools-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .sidebar { display: none; }
+    .main { padding: 1.25rem; }
+  }
+  @media (max-width: 600px) {
+    .tools-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  #tab-products, #tab-tools {
+  margin-top: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <i class="ti ti-layout-grid"></i> Platform
+    </div>
+    <a class="nav-item active" href="#">
+        <i class="ti ti-sparkles"></i>AI Capabilities
+</a>
+    <div style="flex: 1;"></div>
+    <div class="nav-item" style="margin-top: auto;">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-bg);color:var(--blue-text);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">VJ</div>
+      <div>
+        <div style="font-size:12px;font-weight:500;">Vivek</div>
+        <div style="font-size:10px;color:var(--text-muted);">Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(this,'tab-products')">Products</div>
+        <div class="tab" onclick="switchTab(this,'tab-tools')">Tools</div>
+    </div>
+
+    <!-- Tab: Marketplace -->
+    <div id="tab-products">
+      <div class="section-header">
+        <div class="section-title">All tools</div>
+      </div>
+      <div class="tools-grid" id="toolsGrid"></div>
+    </div>
+
+    <!-- Tab: Tools -->
+    <div id="tab-tools" style="display:none;">
+
+  <div class="section-header">
+    <div class="filter-bar">
+      <input id="searchInput" placeholder="Search client..." oninput="renderTable()" />
+
+      <select id="toolFilter" onchange="renderTable()">
+        <option value="">All tools</option>
+      </select>
+
+      <select id="statusFilter" onchange="renderTable()">
+        <option value="">All status</option>
+        <option value="active">Active</option>
+        <option value="trial">Trial</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortBy('name')">Client</th>
+          <th>Tools</th>
+          <th onclick="sortBy('status')">Status</th>
+          <th onclick="sortBy('since')">Since</th>
+          <th>Last active</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+  </main>
+</div>
+
+<!-- Tool detail modal -->
+<div class="modal-overlay" id="toolModal" onclick="closeModalOnOverlay(event, 'toolModal')">
+  <div class="modal" id="toolModalContent"></div>
+</div>
+
+<!-- Client detail modal -->
+<div class="modal-overlay" id="clientModal" onclick="closeModalOnOverlay(event, 'clientModal')">
+  <div class="modal" id="clientModalContent"></div>
+</div>
+
+<!-- Add tool modal -->
+<div class="modal-overlay" id="addToolModal" onclick="closeModalOnOverlay(event, 'addToolModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add new tool</div>
+      <button class="modal-close" onclick="closeModal('addToolModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:5px;">Tool name</label>
+        <input type="text" id="newToolName" placeholder="e.g. CRM Connect" style="width:100%;padding:8px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg);color:var(--text);font-size:13px;outline:none;" />
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:5px;">Description</label>
+        <textarea id="newToolDesc" placeholder="Short description of what this tool does..." rows="3" style="width:100%;padding:8px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg);color:var(--text);font-size:13px;outline:none;resize:vertical;"></textarea>
+      </div>
+      <div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;">
+        <button class="btn" onclick="closeModal('addToolModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="addTool()">Add tool</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const TOOLS = [
+  {
+    id: 1,
+    name: "AI Receptionist Demo",
+    desc: "Video demo",
+    icon: "ti-video",
+    iconBg: "#E6F1FB",
+    iconColor: "#185FA5",
+    progressColor: "#378ADD",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/AI%20Receptionist%20Demo.mp4?sp=r&st=2026-06-15T09:48:44Z&se=2028-06-15T18:03:44Z&spr=https&sv=2026-02-06&sr=b&sig=fjNh6ZXBhNOuQw1bfbqUIw86eSuONWW90CqKnGZDIJE=",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/AI%20Receptionist%20Demo.mp4?sp=r&st=2026-06-15T09:48:44Z&se=2028-06-15T18:03:44Z&spr=https&sv=2026-02-06&sr=b&sig=fjNh6ZXBhNOuQw1bfbqUIw86eSuONWW90CqKnGZDIJE="
+  },
+  {
+    id: 2,
+    name: "Azure Document Ops",
+    desc: "Demo video",
+    icon: "ti-video",
+    iconBg: "#E6F1FB",
+    iconColor: "#185FA5",
+    progressColor: "#378ADD",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/Azure_document_Ops_demo.mp4?sp=r&st=2026-06-15T09:51:20Z&se=2028-06-15T18:06:20Z&spr=https&sv=2026-02-06&sr=b&sig=4QKWy5f0SpvKiSPVs2TiDFHX7XiQH7zN0gMYDUxWSD0=",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/Azure_document_Ops_demo.mp4?sp=r&st=2026-06-15T09:51:20Z&se=2028-06-15T18:06:20Z&spr=https&sv=2026-02-06&sr=b&sig=4QKWy5f0SpvKiSPVs2TiDFHX7XiQH7zN0gMYDUxWSD0="
+  },
+  {
+    id: 3,
+    name: "Architecture Framework",
+    desc: "12-layer demo",
+    icon: "ti-player-play",
+    iconBg: "#EEEDFE",
+    iconColor: "#534AB7",
+    progressColor: "#7F77DD",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/Demo%2012%20layer%20Architecture%20framework.mp4",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/Demo%2012%20layer%20Architecture%20framework.mp4"
+  },
+  {
+    id: 4,
+    name: "House Price Predictor",
+    desc: "ML demo",
+    icon: "ti-home",
+    iconBg: "#EAF3DE",
+    iconColor: "#3B6D11",
+    progressColor: "#639922",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/House%20Price%20Predictor%20Demo.mp4",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/House%20Price%20Predictor%20Demo.mp4"
+  },
+  {
+    id: 5,
+    name: "Insurance Forecasting",
+    desc: "Analytics demo",
+    icon: "ti-chart-bar",
+    iconBg: "#EEEDFE",
+    iconColor: "#534AB7",
+    progressColor: "#7F77DD",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/Insurance%20Charge%20Forecasting%20POC.mp4",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/Insurance%20Charge%20Forecasting%20POC.mp4"
+  },
+  {
+    id: 6,
+    name: "Insurance Policy Demo",
+    desc: "Use case demo",
+    icon: "ti-shield",
+    iconBg: "#FAEEDA",
+    iconColor: "#854F0B",
+    progressColor: "#EF9F27",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/Insurance_Policy_Demo_Harsh.mp4",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/Insurance_Policy_Demo_Harsh.mp4"
+  },
+  {
+    id: 7,
+    name: "NLP Dashboard",
+    desc: "AI dashboard",
+    icon: "ti-brain",
+    iconBg: "#EEEDFE",
+    iconColor: "#534AB7",
+    progressColor: "#7F77DD",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/NLP%20Dashboard.mp4",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/NLP%20Dashboard.mp4"
+  },
+  {
+    id: 8,
+    name: "OCR Invoice Extraction",
+    desc: "OCR demo",
+    icon: "ti-scan",
+    iconBg: "#FAEEDA",
+    iconColor: "#854F0B",
+    progressColor: "#EF9F27",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/OCR_Invoice_Extraction_Demo_Harsh.mp4",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/OCR_Invoice_Extraction_Demo_Harsh.mp4"
+  },
+  {
+    id: 9,
+    name: "Insurance Voice Agent",
+    desc: "Voice AI demo",
+    icon: "ti-microphone",
+    iconBg: "#FAEEDA",
+    iconColor: "#854F0B",
+    progressColor: "#EF9F27",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/QX-insurance_voice_agent.mp4",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/QX-insurance_voice_agent.mp4"
+  },
+  {
+    id: 10,
+    name: "QX Chatbot",
+    desc: "Chatbot demo",
+    icon: "ti-message",
+    iconBg: "#E6F1FB",
+    iconColor: "#185FA5",
+    progressColor: "#378ADD",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/Qxnavigate_chatbot.mp4",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/Qxnavigate_chatbot.mp4"
+  },
+  {
+    id: 11,
+    name: "Real Estate Voice",
+    desc: "Outbound demo",
+    icon: "ti-phone",
+    iconBg: "#FAEEDA",
+    iconColor: "#854F0B",
+    progressColor: "#EF9F27",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/Real_estate_voice_agent_outbound.mp4",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/Real_estate_voice_agent_outbound.mp4"
+  },
+  {
+    id: 12,
+    name: "Candidate Creation ReCo System using CV",
+    desc: "Candidate creation demo",
+    icon: "ti-user-plus",
+    iconBg: "#E6F1FB",
+    iconColor: "#185FA5",
+    progressColor: "#378ADD",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/Canddiate%20Creation%20in%20ReCo%20System%20using%20CV.mp4?sp=r&st=2026-06-22T07:56:35Z&se=2028-06-22T16:11:35Z&spr=https&sv=2026-02-06&sr=b&sig=rVFq3IiWAKerWR6OgzPFTveE%2FJllnxgDEiaPoOWwIV0%3D",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/Canddiate%20Creation%20in%20ReCo%20System%20using%20CV.mp4?sp=r&st=2026-06-22T07:56:35Z&se=2028-06-22T16:11:35Z&spr=https&sv=2026-02-06&sr=b&sig=rVFq3IiWAKerWR6OgzPFTveE%2FJllnxgDEiaPoOWwIV0%3D"
+  },
+  {
+    id: 13,
+    name: "Auto Revenue Report",
+    desc: "Revenue report demo",
+    icon: "ti-chart-line",
+    iconBg: "#E6F1FB",
+    iconColor: "#185FA5",
+    progressColor: "#378ADD",
+    demoLink: "https://demovideoresource.blob.core.windows.net/video/autorevenurereport.mp4?sp=r&st=2026-06-26T12:21:43Z&se=2028-06-26T20:36:43Z&spr=https&sv=2026-02-06&sr=b&sig=AALD%2Bu88980nxZbbMr9PtSiq7MtVemJB6XEripKo61Q%3D",
+    videoLink: "https://demovideoresource.blob.core.windows.net/video/autorevenurereport.mp4?sp=r&st=2026-06-26T12:21:43Z&se=2028-06-26T20:36:43Z&spr=https&sv=2026-02-06&sr=b&sig=AALD%2Bu88980nxZbbMr9PtSiq7MtVemJB6XEripKo61Q%3D"
+  },
+  {
+  id: 14,
+  name: "ReCo Platform",
+  desc: "Candidate management system",
+  icon: "ti-users",
+  iconBg: "#FAEEDA",
+  iconColor: "#854F0B",
+  progressColor: "#EF9F27",
+  demoLink: "http://demo.qxlimited.com/QXRECO/QX/Login/Index",
+  videoLink: "http://demo.qxlimited.com/QXRECO/QX/Login/Index"
+},
+{
+  id: 15,
+  name: "Sonarhire",
+  desc: "Hiring platform",
+  icon: "ti-briefcase",
+  iconBg: "#FAEEDA",
+  iconColor: "#854F0B",
+  progressColor: "#EF9F27",
+  demoLink: "https://frontend-sonarhire.purplemushroom-d9ddba87.uksouth.azurecontainerapps.io/",
+  videoLink: "https://frontend-sonarhire.purplemushroom-d9ddba87.uksouth.azurecontainerapps.io/"
+},
+{
+  id: 16,
+  name: "MailerDesk",
+  desc: "Email automation platform",
+  icon: "ti-mail",
+  iconBg: "#EEEDFE",
+  iconColor: "#534AB7",
+  progressColor: "#7F77DD",
+  demoLink: "http://demo.qxlimited.com/EQS/QXnew/#/login",
+  videoLink: "http://demo.qxlimited.com/EQS/QXnew/#/login"
+}
+];
+
+let sortKey = "";
+let sortDir = 1;
+
+// ---- Tools Grid ----
+function renderTools() {
+  const grid = document.getElementById("toolsGrid");
+  grid.innerHTML = TOOLS.map(t => {
+    
+    return `
+      <div class="tool-card${t.featured ? " featured" : ""}>
+        <div class="tool-top">
+          <div>
+            <div class="tool-icon" style="background:${t.iconBg};"><i class="ti ${t.icon}" style="color:${t.iconColor};font-size:20px;" aria-hidden="true"></i></div>
+            <div class="tool-name">${t.name}</div>
+          </div>
+        </div>
+        <div class="tool-desc">${t.desc}</div>
+        <div class="tool-actions">
+    <button class="btn"
+        onclick="event.stopPropagation(); window.open('${t.demoLink}','_blank')">
+        Demo
+    </button>
+
+    <button class="btn btn-primary"
+        onclick="event.stopPropagation(); window.open('${t.videoLink}','_blank')">
+        Video
+    </button>
+</div>
+      </div>`;
+  }).join("") + `
+    <div class="add-tool-card" onclick="openAddToolModal()">
+      <i class="ti ti-plus" aria-hidden="true"></i>
+      Add new tool
+    </div>`;
+}
+
+// ---- Modals ----
+
+
+
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove("open");
+}
+
+function closeModalOnOverlay(e, id) {
+  if (e.target === document.getElementById(id)) closeModal(id);
+}
+
+function openAddToolModal() {
+  document.getElementById("addToolModal").classList.add("open");
+}
+
+// Fix: openClientModal had a bug using 't' instead of 'c'
+window.openClientModal = function(id) {
+  const c = CLIENTS.find(x => x.id === id);
+  if (!c) return;
+  const clientTools = TOOLS.filter(t => c.tools.includes(t.name));
+  document.getElementById("clientModalContent").innerHTML = `
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="client-avatar" style="background:${c.color};color:${c.tc};width:40px;height:40px;font-size:13px;">${c.initials}</div>
+        <div>
+          <div class="modal-title">${c.name}</div>
+          <div style="font-size:12px;color:var(--text-secondary);">${c.email}</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('clientModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="detail-row"><span class="detail-label">Status</span><span class="badge badge-${c.status}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></div>
+    <div class="detail-row"><span class="detail-label">Member since</span><span class="detail-val">${c.since.replace("-", " / ")}</span></div>
+    <div class="detail-row"><span class="detail-label">Last active</span><span class="detail-val">${c.last}</span></div>
+    <div class="detail-row"><span class="detail-label">Tools in use</span><span class="detail-val">${c.tools.length}</span></div>
+    <div class="modal-section">
+      <div class="modal-section-title">Active tools</div>
+      ${clientTools.map(t => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);">
+          <div class="tool-icon" style="background:${t.iconBg};width:30px;height:30px;font-size:15px;"><i class="ti ${t.icon}" style="color:${t.iconColor};" aria-hidden="true"></i></div>
+          <div style="flex:1;"><div style="font-size:13px;font-weight:500;">${t.name}</div></div>
+          <span class="badge badge-${t.tier}">${t.tier.charAt(0).toUpperCase() + t.tier.slice(1)}</span>
+        </div>`).join("")}
+    </div>`;
+  document.getElementById("clientModal").classList.add("open");
+};
+
+// ---- Add tool ----
+function addTool() {
+  const name = document.getElementById("newToolName").value.trim();
+  const desc = document.getElementById("newToolDesc").value.trim();
+  if (!name) { showToast("Please enter a tool name"); return; }
+  TOOLS.push({
+    id: TOOLS.length + 1,
+    name,
+    desc: desc || "No description provided.",
+
+    icon: "ti-tool",
+    iconBg: "#E6F1FB",
+    iconColor: "#185FA5",
+
+    demoLink: "",
+    videoLink: ""
+});
+  document.getElementById("newToolName").value = "";
+  document.getElementById("newToolDesc").value = "";
+  closeModal("addToolModal");
+  renderTools();
+  computeStats();
+  showToast("Tool added successfully");
+}
+// ---- Toast ----
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// ---- Tab switch ----
+function switchTab(el, tabId) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+
+  document.getElementById("tab-products").style.display = "none";
+  document.getElementById("tab-tools").style.display = "none";
+
+  document.getElementById(tabId).style.display = "";
+}
+
+
+// ---- Init ----
+renderTools();
+populateToolFilter();   // 🔥 missing before
+renderTable();          // 🔥 required for table
+window.scrollTo(0, 0);
+document.querySelectorAll(".nav-item").forEach(item => {
+  item.addEventListener("click", function (e) {
+    e.preventDefault();
+
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    this.classList.add("active");
+
+    const text = this.innerText.trim();
+  });
+});
+</script>
+</body>
+</html>
